@@ -35,16 +35,8 @@ EOD
 variable "shared_vpc_host_project_id" {
   type        = string
   description = <<EOD
-The GCP project identifier of the Shared VPC Host project that will define
-networks.
-EOD
-}
-
-variable "shared_vpc_service_project_id" {
-  type        = string
-  description = <<EOD
-The GCP project identifier of the Shared VPC Service project that will contain
-backend services attached to a `Shared VPC Host` network.
+The GCP project identifier of the Shared VPC Host project that will contain the
+shared VPC networks, and BIG-IP instances.
 EOD
 }
 
@@ -56,34 +48,70 @@ The region to deploy test resources. Default is 'us-west1'.
 EOD
 }
 
-variable "external_cidr" {
+variable "base_cidr" {
   type        = string
-  default     = "172.16.0.0/16"
+  default     = "172.16.0.0/12"
   description = <<EOD
-The CIDR to use for External facing subnet. Default is '172.16.0.0/16'.
+The base CIDR that will be used for all VPC networks.
 EOD
 }
 
-variable "management_cidr" {
-  type        = string
-  default     = "172.17.0.0/16"
+variable "vpc_cidr_size" {
+  type        = number
+  default     = 17
   description = <<EOD
-The CIDR to use for management facing subnet. Default is '172.17.0.0/16'.
+The target CIDR size for each VPC network. Default is 17.
+
+E.g. if there are three environments (dev, test, and prod), then 5 VPCs will be
+created each with a /17 CIDR block out of the 172.16.0.0/12 range specified in
+`base_cidr`.
 EOD
 }
 
-variable "dev_cidr" {
-  type        = string
-  default     = "172.18.0.0/16"
+variable "num_bigips" {
+  type        = number
+  default     = 1
   description = <<EOD
-The CIDR to use for dev subnet. Default is '172.18.0.0/16'.
+The number of BIG-IP instances to run. Default is 1.
 EOD
 }
 
-variable "test_cidr" {
+variable "bigip_machine_type" {
+  type    = string
+  default = "n2-standard-8"
+}
+
+variable "bigip_min_cpu_platform" {
+  type    = string
+  default = "Intel Cascade Lake"
+}
+
+variable "bigip_image" {
   type        = string
-  default     = "172.19.0.0/16"
+  default     = "projects/f5-7626-networks-public/global/images/f5-bigip-15-1-2-1-0-0-10-payg-good-25mbps-210115160742"
   description = <<EOD
-The CIDR to use for External facing subnet. Default is '172.19.0.0/16'.
+The BIG-IP image to use; default is a v15.1.2.1 PAYG licensed GOOD/25MBps image.
+EOD
+}
+
+variable "environments" {
+  type = map(object({
+    service_project_id = string
+  }))
+  description = <<EOD
+A map of environment names to the parameters that will drive creation of VPC networks for
+discoverable backend services.
+
+E.g. to simulate a beta and prod pair of environments:
+
+environments = {
+  beta = {
+    service_project_id = "beta-service-project-id"
+    num_instances = 1
+  },
+  prod = {
+    service_project_id = "prod-service-project-id"
+  }
+}
 EOD
 }

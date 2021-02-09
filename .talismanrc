@@ -1,5 +1,15 @@
-# spell-checker: ignore fileignoreconfig
+# spell-checker: ignore fileignoreconfig bigip
 ---
 fileignoreconfig:
 - filename: .github/workflows/release.yml
   checksum: be3e0d4c7edcb374e48a402fb87c08b86fe49e4f89bbdf1e04bd8d14492abec6
+- filename: main.tf
+  checksum: a31b3df52c18a42ec9197bb95cc250199b70101e735f9b6fc24f3fe6d135a5fe
+- filename: modules/backend/variables.tf
+  checksum: 818bc36550335ae3492556d4c4078212ca15289f9d5fa711b6f4d0f9a28bb1ac
+- filename: bigip.tf
+  checksum: 47b4639874848f7d682086a4286af8f29750ccc238f0a76a07a1fa18086b7fdb
+- filename: templates/as3.json
+  checksum: 46677e5cbca2ba9acbadd5dfbd7645538f984376c791d5c063fd37000c7e84d8
+- filename: modules/backend/README.md
+  checksum: 374ddff738e81d9b8cabb819e82fa6ce1beab44dfa94aea6da00f6e171ef6c46

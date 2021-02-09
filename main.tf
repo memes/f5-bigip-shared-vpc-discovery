@@ -1,49 +1,31 @@
 #
 
-
-# Generate a BIG-IP service account to use with the VM.
-module "bigip_sa" {
-  source     = "terraform-google-modules/service-accounts/google"
-  version    = "3.0.1"
-  project_id = var.shared_vpc_host_project_id
-  prefix     = var.prefix
-  names      = ["bigip-vm"]
-  project_roles = [
-    "${var.shared_vpc_host_project_id}=>roles/logging.logWriter",
-    "${var.shared_vpc_host_project_id}=>roles/monitoring.metricWriter",
-    "${var.shared_vpc_host_project_id}=>roles/monitoring.viewer",
-  ]
-  generate_keys = false
-}
-
-# Generate a service account in the Shared VPC Service project that has ability
-# to view attributes of VMs.
-module "discovery_sa" {
-  source     = "terraform-google-modules/service-accounts/google"
-  version    = "3.0.1"
-  project_id = var.shared_vpc_service_project_id
-  prefix     = var.prefix
-  names      = ["bigip-sd"]
-  project_roles = [
-    "${var.shared_vpc_service_project_id}=>roles/compute.viewer",
-  ]
-  generate_keys = true
-}
-
 locals {
-  bigip_vm_sa = format("%s-bigip-vm@%s.iam.gserviceaccount.com", var.prefix, var.shared_vpc_host_project_id)
-  bigip_sd_sa = format("%s-bigip-sd@%s.iam.gserviceaccount.com", var.prefix, var.shared_vpc_service_project_id)
+  service_discovery_key          = "f5-service-discovery"
+  service_discovery_value_format = format("%s-%%s", var.prefix)
+  short_region                   = replace(var.region, "/^[^-]+-([^0-9-]+)[0-9]$/", "$1")
+  subnet_cidr_offset             = var.vpc_cidr_size - tonumber(replace(var.base_cidr, "/^.*\\//", ""))
+  subnet_cidrs = merge(
+    {
+      external   = cidrsubnet(var.base_cidr, local.subnet_cidr_offset, 0),
+      management = cidrsubnet(var.base_cidr, local.subnet_cidr_offset, 1),
+    },
+    { for k, v in var.environments :
+      k => cidrsubnet(var.base_cidr, local.subnet_cidr_offset, 2 + index(keys(var.environments), k))
+    },
+  )
 }
 
-
-module "bigip_passwd" {
-  source     = "memes/secret-manager/google//modules/random"
-  version    = "1.0.2"
-  project_id = var.shared_vpc_host_project_id
-  id         = format("%s-bigip-admin-key", var.prefix)
-  accessors = [
-    format("serviceAccount:%s", local.bigip_vm_sa)
-  ]
-  length           = 16
-  special_char_set = "@#%&*()-_=+[]<>:?"
+module "backend" {
+  for_each      = var.environments
+  source        = "./modules/backend/"
+  project_id    = each.value.service_project_id
+  region        = var.region
+  prefix        = var.prefix
+  environment   = each.key
+  num_instances = lookup(each.value, "num_instances", 2)
+  subnet        = element(module.environment_vpcs[each.key].subnets_self_links, 0)
+  labels = {
+    (local.service_discovery_key) = format(local.service_discovery_value_format, each.key)
+  }
 }

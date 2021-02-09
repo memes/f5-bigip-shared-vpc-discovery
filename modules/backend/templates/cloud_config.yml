@@ -1,0 +1,33 @@
+## template: jinja
+#cloud-config
+write_files:
+  - path: /etc/nginx/sites-enabled/default
+    permissions: 0644
+    owner: root
+    content: |
+      server {
+        listen 80;
+        root /var/www/html;
+        index index.html;
+        location / {
+          sub_filter '!!BIG-IP!!' $remote_addr;
+          sub_filter_once on;
+          try_files $uri $uri/ =404;
+        }
+      }
+  - path: /var/www/html/index.html
+    permissions: 0644
+    owner: root
+    content: |
+      <html>
+        <head>
+          <title>Backend</title>
+        </head>
+        <body>
+          <h1>${env}</h1>
+          <p>Running on {{ v1.local_hostname }} via VIP !!BIG-IP!!</p>
+        </body>
+      </html>
+
+packages:
+  - nginx

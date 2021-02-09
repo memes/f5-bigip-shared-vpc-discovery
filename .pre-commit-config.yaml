@@ -1,14 +1,21 @@
-# TODO: @memes - remove unused plugins for project
+# Checks run on git actions
 ---
-# spell-checker:disable
+# spell-checker: ignore yamllint talismanrc
 repos:
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.26.0
     hooks:
       - id: yamllint
         files: \.(yml|yaml|talismanrc)$
+        # cloud-init file *must* begin with #cloud-config so do not include in
+        # strict check
+        exclude: cloud_config\.yml$
         types: [file, yaml]
         entry: yamllint --strict
+      - id: yamllint
+        name: yamllint-cloud-config
+        files: cloud_config\.yml$
+        entry: yamllint
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.45.0
     hooks:

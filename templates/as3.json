@@ -1,0 +1,106 @@
+{
+    "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/v3.24.0/schema/3.24.0/as3-schema.json",
+    "action": "deploy",
+    "class": "AS3",
+    "declaration": {
+        "class": "ADC",
+        "id": "shared-vpc-svc-discovery",
+        "label": "shared-vpc-svc-discovery",
+        "remark": "Demonstrating service discovery in Shared VPC",
+        "schemaVersion": "3.24.0",
+        "shared_vpc": {
+            "class": "Tenant",
+            "app": {
+                "class": "Application",
+                "template": "http",
+                "serviceMain": {
+                    "class": "Service_HTTP",
+                    "virtualAddresses": [
+                        "${vip}"
+                    ],
+                    "policyEndpoint": "backend_policy"
+                },
+                "backend_policy": {
+                    "class": "Endpoint_Policy",
+                    "strategy": "first-match",
+                    "rules": [
+%{ for k,v in environments ~}
+                        {
+                            "name": "forward_to_${k}",
+                            "conditions": [
+                                {
+                                    "type": "httpUri",
+                                    "queryString": {
+                                        "operand": "contains",
+                                        "values": [
+                                            "${k}"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "type": "forward",
+                                    "event": "request",
+                                    "select": {
+                                        "pool": {
+                                            "use": "${k}_pool"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+%{ endfor ~}
+                        {
+                            "name": "fallback",
+                            "conditions": [
+                                {
+                                    "type": "httpUri",
+                                    "host": {
+                                        "operand": "contains",
+                                        "values": [
+                                            "."
+                                        ]
+                                    }
+                                }
+                            ],
+                            "actions": [
+                                {
+                                    "type": "forward",
+                                    "event": "request",
+                                    "select": {
+                                        "pool": {
+                                            "use": "${fallback_environment}_pool"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+%{ for k,v in environments ~}
+                "${k}_pool": {
+                    "class": "Pool",
+                    "monitors": [
+                        "http"
+                    ],
+                    "members": [
+                        {
+                            "servicePort": 80,
+                            "addressDiscovery": "gce",
+                            "updateInterval": 5,
+                            "tagKey": "${v.label_key}",
+                            "tagValue": "${v.label_value}",
+                            "addressRealm": "private",
+                            "region": "${region}",
+                            "encodedCredentials": "${v.creds}"
+                        }
+                    ]
+                },
+%{ endfor ~}
+                "remark": "dynamic backend pool discovery and selection"
+            }
+        }
+    },
+    "persist": true
+}

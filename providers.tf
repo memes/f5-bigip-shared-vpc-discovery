@@ -39,11 +39,3 @@ provider "google" {
   version      = "~> 3.48"
   access_token = length(data.google_service_account_access_token.sa_token) == 1 ? element(data.google_service_account_access_token.sa_token, 0).access_token : null
 }
-
-# Instantiate unaliased google-beta provider that is using the token associated
-# with the target service account. This is the provider that will be used for
-# resource creation.
-provider "google-beta" {
-  version      = "~> 3.48"
-  access_token = length(data.google_service_account_access_token.sa_token) == 1 ? element(data.google_service_account_access_token.sa_token, 0).access_token : null
-}
