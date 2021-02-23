@@ -115,3 +115,12 @@ environments = {
 }
 EOD
 }
+
+variable "domain_name" {
+  type        = string
+  default     = "example.com"
+  description = <<EOD
+The DNS domain name to use for BIG-IP host FQDN, and for the generated TLS
+certificate. Default is 'example.com'.
+EOD
+}

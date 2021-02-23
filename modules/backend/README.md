@@ -20,6 +20,21 @@ Creates a _backend service_ for named environment in specified project.
 | google | >= 3.55 |
 | random | n/a |
 
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| discovery_sa | terraform-google-modules/service-accounts/google | 3.0.1 |
+| vm_sa | terraform-google-modules/service-accounts/google | 3.0.1 |
+
+## Resources
+
+| Name |
+|------|
+| [google_compute_instance](https://registry.terraform.io/providers/hashicorp/google/3.55/docs/resources/compute_instance) |
+| [google_compute_zones](https://registry.terraform.io/providers/hashicorp/google/3.55/docs/data-sources/compute_zones) |
+| [random_shuffle](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -43,6 +58,5 @@ Creates a _backend service_ for named environment in specified project.
 | discovery\_service\_account | A service account that can perform service discovery API calls in project used<br>by the backend. |
 | discovery\_service\_account\_credentials | JSON service account credentials for service discovery account. |
 | vm\_service\_account | The service account that is used by this backend service. |
-
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 <!-- markdownlint-enable no-inline-html -->

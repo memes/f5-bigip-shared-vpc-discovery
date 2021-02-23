@@ -18,6 +18,32 @@
 | google | ~> 3.48 ~> 3.48 |
 | google.executor | ~> 3.48 ~> 3.48 |
 | random | n/a |
+| tls | n/a |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| backend | ./modules/backend/ |  |
+| bigip | memes/f5-bigip/google | 2.1.0-rc1 |
+| bigip_passwd | memes/secret-manager/google//modules/random | 1.0.2 |
+| bigip_sa | terraform-google-modules/service-accounts/google | 3.0.1 |
+| environment_vpcs | terraform-google-modules/network/google | 3.0.1 |
+| external_vpc | terraform-google-modules/network/google | 3.0.1 |
+| management_vpc | terraform-google-modules/network/google | 3.0.1 |
+
+## Resources
+
+| Name |
+|------|
+| [google_client_config](https://registry.terraform.io/providers/hashicorp/google/3.48/docs/data-sources/client_config) |
+| [google_compute_address](https://registry.terraform.io/providers/hashicorp/google/3.48/docs/resources/compute_address) |
+| [google_compute_firewall](https://registry.terraform.io/providers/hashicorp/google/3.48/docs/resources/compute_firewall) |
+| [google_compute_zones](https://registry.terraform.io/providers/hashicorp/google/3.48/docs/data-sources/compute_zones) |
+| [google_service_account_access_token](https://registry.terraform.io/providers/hashicorp/google/3.48/docs/data-sources/service_account_access_token) |
+| [random_shuffle](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) |
+| [tls_private_key](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) |
+| [tls_self_signed_cert](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/self_signed_cert) |
 
 ## Inputs
 
@@ -29,6 +55,7 @@
 | bigip\_image | The BIG-IP image to use; default is a v15.1.2.1 PAYG licensed GOOD/25MBps image. | `string` | `"projects/f5-7626-networks-public/global/images/f5-bigip-15-1-2-1-0-0-10-payg-good-25mbps-210115160742"` | no |
 | bigip\_machine\_type | n/a | `string` | `"n2-standard-8"` | no |
 | bigip\_min\_cpu\_platform | n/a | `string` | `"Intel Cascade Lake"` | no |
+| domain\_name | The DNS domain name to use for BIG-IP host FQDN, and for the generated TLS<br>certificate. Default is 'example.com'. | `string` | `"example.com"` | no |
 | num\_bigips | The number of BIG-IP instances to run. Default is 1. | `number` | `1` | no |
 | prefix | The prefix to use when creating resources, default is 'shared-vpc-sd'. Change this<br>value to avoid conflict with other deployments. | `string` | `"shared-vpc-sd"` | no |
 | region | The region to deploy test resources. Default is 'us-west1'. | `string` | `"us-west1"` | no |
@@ -38,7 +65,9 @@
 
 ## Outputs
 
-No output.
-
+| Name | Description |
+|------|-------------|
+| external | The reservered public IP addresses for services defined on BIG-IPs. |
+| management | The public IP addresses for BIG-IP management. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 <!-- markdownlint-enable no-inline-html -->
